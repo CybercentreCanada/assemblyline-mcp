@@ -1,0 +1,131 @@
+
+services:
+  al_frontend:
+    image: cccs/assemblyline-ui-frontend
+    ports:
+      - "3000:3000"
+
+  al_ui:
+    image: cccs/assemblyline_dev:4.7.1
+    environment:
+      - AL_UNSECURED_UI=true
+    ports:
+      - "5000:5000"
+    volumes:
+      - ${PATH_REWRITE:-.}/config/:/etc/assemblyline/
+      - ${ROOT_REWRITE:-../..}:/opt/alv4/
+    working_dir: /opt/alv4/assemblyline-ui/assemblyline_ui/
+    command: python3 app.py
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    extra_hosts:
+      - "localhost:host-gateway"
+
+  al_socketio:
+    image: cccs/assemblyline_dev:4.7.1
+    ports:
+      - "5002:5002"
+    volumes:
+      - ${PATH_REWRITE:-.}/config/:/etc/assemblyline/
+      - ${ROOT_REWRITE:-../..}:/opt/alv4/
+    working_dir: /opt/alv4/assemblyline-ui/assemblyline_ui/
+    command: python3 socketsrv.py
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    extra_hosts:
+      - "localhost:host-gateway"
+
+  al_mcp:
+    build:
+      context: ..
+    ports:
+      - "8000:8000"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    extra_hosts:
+      - "localhost:host-gateway"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    environment:
+      - xpack.security.enabled=true
+      - discovery.type=single-node
+      - logger.level=WARN
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - ELASTIC_PASSWORD=devpass
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -u elastic:devpass --silent --fail localhost:9200/_cluster/health || exit 1"
+        ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  redis:
+    image: redis
+    ports:
+      - "6380:6379"
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    image: cccs/nginx-ssl-frontend
+    environment:
+      TEMPLATE: minimal
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      al_ui:
+        condition: service_started
+      al_socketio:
+        condition: service_started
+
+  minio:
+    image: minio/minio
+    environment:
+      MINIO_ROOT_USER: al_storage_key
+      MINIO_ROOT_PASSWORD: Ch@ngeTh!sPa33w0rd
+    ports:
+      - "9000:9000"
+    command: server /data
+
+# OAuth testing
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7
+    environment:
+      - KC_HEALTH_ENABLED=true
+    volumes:
+      - ${PATH_REWRITE:-.}/config/keycloak-realm.json:/opt/keycloak/data/import/realm.json
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "{ printf 'HEAD /health/ready HTTP/1.0\r\n\r\n' >&0; grep 'HTTP/1.0 200'; } 0<>/dev/tcp/localhost/9000"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

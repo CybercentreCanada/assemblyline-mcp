@@ -1,0 +1,85 @@
+[project]
+name = "assemblyline-mcp"
+description = "FastMCP server for Assemblyline"
+requires-python = ">=3.14"
+dependencies = ["fastmcp==3.4.7", "assemblyline_client>=4.10.1"]
+authors = [
+    { name = "CCCS Assemblyline development team", email = "assemblyline@cyber.gc.ca" },
+]
+dynamic = ["version", "readme"]
+license = { file = "LICENSE.md" }
+keywords = [
+    "assemblyline",
+    "malware analysis",
+    "gc",
+    "canada",
+    "cse-cst",
+    "cse",
+    "cst",
+    "cyber",
+    "cccs",
+    "mcp",
+    "server",
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.14",
+]
+
+[project.urls]
+Repository = "https://github.com/CybercentreCanada/assemblyline-mcp"
+Issues = "https://github.com/CybercentreCanada/assemblyline/issues"
+
+[project.optional-dependencies]
+dev = ["pytest-asyncio", "ruff", "assemblyline>=4.7"]
+
+[tool.setuptools.dynamic]
+readme = { file = ["README.md"], content-type = "text/markdown" }
+
+[tool.setuptools.packages.find]
+exclude = ["test"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.uv.extra-build-dependencies]
+ssdeep = ["pkg_resources"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+# Add the `line-too-long` rule to the enforced rule set. By default, Ruff omits rules that
+# overlap with the use of a formatter, like Black, but we can override this behavior by
+# explicitly adding the rule.
+extend-select = ["E501", "D", "D404", "DOC"]
+ignore = [
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "E501",
+    "DOC201",
+]
+preview = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"

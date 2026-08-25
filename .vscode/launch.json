@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "[MCP] API Server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "mcp_server/app.py",
+            "console": "internalConsole",
+            "justMyCode": false,
+            "env": {
+                "AL_UI": "http://localhost:5000",
+            }
+        }
+    ]
+}
