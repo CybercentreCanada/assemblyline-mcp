@@ -1,0 +1,57 @@
+name: tests
+
+trigger: ["*"]
+pr: ["*"]
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  # Try to checkout the matching branch, if the command fails, don't care.
+  BRANCH_NAME: $[coalesce(variables['System.PullRequest.SourceBranch'], variables['System.PullRequest.TargetBranch'], replace(variables['Build.SourceBranch'], 'refs/heads/', ''))]
+
+resources:
+  repositories:
+    - repository: assemblyline-base
+      type: github
+      endpoint: github-repo-sa
+      name: CybercentreCanada/assemblyline-base
+    - repository: assemblyline-core
+      type: github
+      endpoint: github-repo-sa
+      name: CybercentreCanada/assemblyline-core
+    - repository: assemblyline-ui
+      type: github
+      endpoint: github-repo-sa
+      name: CybercentreCanada/assemblyline-ui
+
+jobs:
+  - job: run_test
+    timeoutInMinutes: 15
+    steps:
+      - task: UsePythonVersion@0
+        displayName: Set python version
+        inputs:
+          versionSpec: "3.14"
+      - checkout: self
+        displayName: Checkout assemblyline-mcp
+      # API Dependencies
+      - checkout: assemblyline-base
+        displayName: Checkout assemblyline-base
+      - checkout: assemblyline-core
+        displayName: Checkout assemblyline-core
+      - checkout: assemblyline-ui
+        displayName: Checkout assemblyline-ui
+      - script: |
+          # Checkout the matching branch for all repositories, if the command fails, don't care.
+          git checkout -b $BRANCH_NAME -t origin/$BRANCH_NAME || true
+          for d in ./*/; do (cd "$d" && git checkout $BRANCH_NAME || git checkout main); done
+
+          # Start up dependencies and wait until all services are healthy
+          sudo docker compose -f assemblyline-mcp/test/docker-compose.yml up -d --wait
+
+          # Start test
+          sudo env "PATH=$PATH" "PIP_USE_PEP517=true" python -m pip install --no-cache-dir -e .[test]
+          pytest -rsx -vv assemblyline-mcp
+        workingDirectory: $(Pipeline.Workspace)/s
+        displayName: Test

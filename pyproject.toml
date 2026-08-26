@@ -35,7 +35,7 @@ Repository = "https://github.com/CybercentreCanada/assemblyline-mcp"
 Issues = "https://github.com/CybercentreCanada/assemblyline/issues"
 
 [project.optional-dependencies]
-dev = ["pytest-asyncio", "ruff", "assemblyline>=4.7"]
+test = ["pytest-asyncio", "ruff", "assemblyline>=4.7"]
 
 [tool.setuptools.dynamic]
 readme = { file = ["README.md"], content-type = "text/markdown" }

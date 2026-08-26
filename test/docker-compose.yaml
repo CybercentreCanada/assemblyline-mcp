@@ -23,6 +23,11 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import requests; requests.head(\"http://localhost:5000/healthz/live\", timeout=2).raise_for_status()' || exit 1"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
     extra_hosts:
       - "localhost:host-gateway"
 
@@ -42,6 +47,11 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import requests; requests.head(\"http://localhost:5002/healthz/live\", timeout=1).raise_for_status()' || exit 1"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
     extra_hosts:
       - "localhost:host-gateway"
 
@@ -51,11 +61,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      elasticsearch:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
+      al_ui:
         condition: service_started
     extra_hosts:
       - "localhost:host-gateway"
@@ -92,9 +98,7 @@ services:
       retries: 3
 
   nginx:
-    image: cccs/nginx-ssl-frontend
-    environment:
-      TEMPLATE: minimal
+    image: cccs/nginx-ssl-frontend:dev
     ports:
       - "443:443"
       - "80:80"
