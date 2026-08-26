@@ -56,9 +56,15 @@ jobs:
           sudo env "PATH=$PATH" "PIP_USE_PEP517=true" python -m pip install --no-cache-dir -e ./assemblyline-mcp[test]
 
         workingDirectory: $(Pipeline.Workspace)/s
-        displayName: Setup environment
+        displayName: Setup environment 🏗️
 
       - script: |
           pytest -rsx -vv
         workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
-        displayName: Run tests
+        displayName: Run tests 🧪
+
+      - script: |
+          ruff check
+          ruff format --check
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
+        displayName: Ruff checks 🐶
