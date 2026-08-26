@@ -48,7 +48,9 @@ jobs:
           for d in ./*/; do (cd "$d" && git checkout $BRANCH_NAME || git checkout main); done
 
           # Start up dependencies and wait until all services are healthy
-          sudo docker compose --progress=plain -f assemblyline-mcp/test/docker-compose.yml up -d --wait --quiet-build --quiet-pull
+          echo "Starting docker compose services..."
+          sudo docker compose --progress=quiet -f assemblyline-mcp/test/docker-compose.yml up -d --wait
+          echo "Services started and healthy."
 
           # Start test
           sudo env "PATH=$PATH" "PIP_USE_PEP517=true" python -m pip install --no-cache-dir -e ./assemblyline-mcp[test]
