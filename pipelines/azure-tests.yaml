@@ -52,8 +52,13 @@ jobs:
           sudo docker compose --progress=quiet -f assemblyline-mcp/test/docker-compose.yml up -d --wait
           echo "Services started and healthy."
 
-          # Start test
+          # Setup python environment
           sudo env "PATH=$PATH" "PIP_USE_PEP517=true" python -m pip install --no-cache-dir -e ./assemblyline-mcp[test]
-          pytest -rsx -vv assemblyline-mcp
+
         workingDirectory: $(Pipeline.Workspace)/s
-        displayName: Test
+        displayName: Setup environment
+
+      - script: |
+          pytest -rsx -vv
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
+        displayName: Run tests
