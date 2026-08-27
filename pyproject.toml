@@ -7,7 +7,7 @@ authors = [
     { name = "CCCS Assemblyline development team", email = "assemblyline@cyber.gc.ca" },
 ]
 dynamic = ["version", "readme"]
-license = { file = "LICENSE.md" }
+license = { file = "LICENCE.md" }
 keywords = [
     "assemblyline",
     "malware analysis",
