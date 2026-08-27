@@ -90,6 +90,4 @@ jobs:
             echo "The PR source commit is not included in dev. Merge the feature branch into dev before merging into main."
             exit 1
           fi
-
-        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
         displayName: Check if merged into dev 🔍
