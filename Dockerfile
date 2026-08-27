@@ -1,4 +1,4 @@
-FROM astral/uv:python3.11-alpine
+FROM astral/uv:python3.14-alpine
 
 WORKDIR /server
 

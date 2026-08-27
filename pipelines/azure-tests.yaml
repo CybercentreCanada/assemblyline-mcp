@@ -1,0 +1,95 @@
+name: tests
+
+trigger: ["*"]
+pr: ["*"]
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  # Try to checkout the matching branch, if the command fails, don't care.
+  BRANCH_NAME: $[coalesce(variables['System.PullRequest.SourceBranch'], variables['System.PullRequest.TargetBranch'], replace(variables['Build.SourceBranch'], 'refs/heads/', ''))]
+
+resources:
+  repositories:
+    - repository: assemblyline-base
+      type: github
+      endpoint: github-repo-sa
+      name: CybercentreCanada/assemblyline-base
+    - repository: assemblyline-core
+      type: github
+      endpoint: github-repo-sa
+      name: CybercentreCanada/assemblyline-core
+    - repository: assemblyline-ui
+      type: github
+      endpoint: github-repo-sa
+      name: CybercentreCanada/assemblyline-ui
+
+jobs:
+  # Main job that tests MCP functionality and covers linting and formatting checks.
+  - job: run_test
+    displayName: Run tests 🧪
+    timeoutInMinutes: 15
+    steps:
+      - task: UsePythonVersion@0
+        displayName: Set python version
+        inputs:
+          versionSpec: "3.14"
+      - checkout: self
+        displayName: Checkout assemblyline-mcp
+      # API Dependencies
+      - checkout: assemblyline-base
+        displayName: Checkout assemblyline-base
+      - checkout: assemblyline-core
+        displayName: Checkout assemblyline-core
+      - checkout: assemblyline-ui
+        displayName: Checkout assemblyline-ui
+      - script: |
+          # Checkout the matching branch for all repositories, if the command fails, don't care.
+          git checkout -b $BRANCH_NAME -t origin/$BRANCH_NAME || true
+          for d in ./*/; do (cd "$d" && git checkout $BRANCH_NAME || git checkout main); done
+
+          # Start up dependencies and wait until all services are healthy
+          echo "Starting docker compose services..."
+          sudo docker compose --progress=quiet -f assemblyline-mcp/test/docker-compose.yml up -d --wait
+          echo "Services started and healthy."
+
+          # Setup python environment
+          sudo env "PATH=$PATH" "PIP_USE_PEP517=true" python -m pip install --no-cache-dir -e ./assemblyline-mcp[test]
+
+        workingDirectory: $(Pipeline.Workspace)/s
+        displayName: Setup environment 🏗️
+
+      - script: |
+          pytest -rsx -vv
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
+        displayName: Run tests 🧪
+
+      - script: |
+          ruff check
+          ruff format --check
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
+        displayName: Ruff checks 🐶
+
+  # This check ensures PRs targeting main are based on commits that have already been merged into dev, helping release managers confirm the feature branch was validated in the dev branch before merge.
+
+  - job: run_diff_check
+    displayName: Desync check 🔍
+    condition: and(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['System.PullRequest.TargetBranch'], 'main'))
+    timeoutInMinutes: 5
+    steps:
+      - checkout: self
+        displayName: Checkout assemblyline-mcp
+        fetchDepth: 0
+      - script: |
+          # Fetch the dev branch to check if the PR source commit is included in dev.
+          git fetch origin dev
+
+          # Check if the PR source commit is included in dev.
+          if git merge-base --is-ancestor "$(System.PullRequest.SourceCommitId)" "origin/dev"; then
+            echo "The PR source commit is included in dev."
+          else
+            echo "The PR source commit is not included in dev. Merge the feature branch into dev before merging into main."
+            exit 1
+          fi
+        displayName: Check if merged into dev 🔍
