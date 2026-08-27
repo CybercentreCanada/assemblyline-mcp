@@ -68,3 +68,28 @@ jobs:
           ruff format --check
         workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
         displayName: Ruff checks 🐶
+
+  - job: run_diff_check
+    timeoutInMinutes: 15
+    steps:
+      - checkout: self
+        displayName: Checkout assemblyline-mcp
+        fetchDepth: 0
+      - script: |
+          # If this is a PR to main, then we need to check if changes from the feature branch have been merged into dev.
+          if [[ "$(System.PullRequest.TargetBranch)" != "refs/heads/main" ]]; then
+            echo "This is not a pull request to main; skipping the dev merge check."
+            exit 0
+          fi
+
+          git fetch origin dev
+
+          if git merge-base --is-ancestor "$(System.PullRequest.SourceCommitId)" "origin/dev"; then
+            echo "The PR source commit is included in dev."
+          else
+            echo "The PR source commit is not included in dev. Merge the feature branch into dev before merging into main."
+            exit 1
+          fi
+
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
+        displayName: Check if merged into dev 🔍
