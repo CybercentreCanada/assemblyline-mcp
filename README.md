@@ -1,7 +1,7 @@
 [![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://discord.gg/GUAy9wErNu)
 [![](https://img.shields.io/discord/908084610158714900)](https://discord.gg/GUAy9wErNu)
 [![Static Badge](https://img.shields.io/badge/github-assemblyline-blue?logo=github)](https://github.com/CybercentreCanada/assemblyline)
-[![Static Badge](https://img.shields.io/badge/github-assemblyline--v4--service-blue?logo=github)](https://github.com/CybercentreCanada/assemblyline-mcp)
+[![Static Badge](https://img.shields.io/badge/github-assemblyline--mcp-blue?logo=github)](https://github.com/CybercentreCanada/assemblyline-mcp)
 [![GitHub Issues or Pull Requests by label](https://img.shields.io/github/issues/CybercentreCanada/assemblyline/mcp)](https://github.com/CybercentreCanada/assemblyline/issues?q=is:issue+is:open+label:mcp)
 [![License](https://img.shields.io/github/license/CybercentreCanada/assemblyline-mcp)](./LICENCE.md)
 

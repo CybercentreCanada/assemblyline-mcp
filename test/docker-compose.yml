@@ -1,10 +1,5 @@
 
 services:
-  al_frontend:
-    image: cccs/assemblyline-ui-frontend
-    ports:
-      - "3000:3000"
-
   al_ui:
     image: cccs/assemblyline_dev:4.7.1
     environment:
@@ -23,25 +18,11 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
-    extra_hosts:
-      - "localhost:host-gateway"
-
-  al_socketio:
-    image: cccs/assemblyline_dev:4.7.1
-    ports:
-      - "5002:5002"
-    volumes:
-      - ${PATH_REWRITE:-.}/config/:/etc/assemblyline/
-      - ${ROOT_REWRITE:-../..}:/opt/alv4/
-    working_dir: /opt/alv4/assemblyline-ui/assemblyline_ui/
-    command: python3 socketsrv.py
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import requests; requests.head(\"http://localhost:5000/healthz/live\", timeout=2).raise_for_status()' || exit 1"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
     extra_hosts:
       - "localhost:host-gateway"
 
@@ -51,11 +32,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      elasticsearch:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
+      al_ui:
         condition: service_started
     extra_hosts:
       - "localhost:host-gateway"
@@ -93,15 +70,11 @@ services:
 
   nginx:
     image: cccs/nginx-ssl-frontend
-    environment:
-      TEMPLATE: minimal
     ports:
       - "443:443"
       - "80:80"
     depends_on:
       al_ui:
-        condition: service_started
-      al_socketio:
         condition: service_started
 
   minio:
