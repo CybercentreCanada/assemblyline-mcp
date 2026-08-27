@@ -69,7 +69,7 @@ services:
       retries: 3
 
   nginx:
-    image: cccs/nginx-ssl-frontend:dev
+    image: cccs/nginx-ssl-frontend
     ports:
       - "443:443"
       - "80:80"
