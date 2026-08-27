@@ -71,8 +71,7 @@ jobs:
         workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
         displayName: Ruff checks 🐶
 
-  # Side job for PRs that checks if the PR source commit has been merged into dev before merging into main.
-  # Useful for release managers to ensure that changes from feature branches have been integrated into the dev branch (and hopefully tested thoroughly) before merging into main.
+  # This check ensures PRs targeting main are based on commits that have already been merged into dev, helping release managers confirm the feature branch was validated in the dev branch before merge.
 
   - job: run_diff_check
     displayName: Desync check 🔍
