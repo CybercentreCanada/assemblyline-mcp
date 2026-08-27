@@ -70,26 +70,3 @@ jobs:
           ruff format --check
         workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
         displayName: Ruff checks 🐶
-
-  # This check ensures PRs targeting main are based on commits that have already been merged into dev, helping release managers confirm the feature branch was validated in the dev branch before merge.
-
-  - job: run_diff_check
-    displayName: Desync check 🔍
-    condition: and(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['System.PullRequest.TargetBranch'], 'main'))
-    timeoutInMinutes: 5
-    steps:
-      - checkout: self
-        displayName: Checkout assemblyline-mcp
-        fetchDepth: 0
-      - script: |
-          # Fetch the dev branch to check if the PR source commit is included in dev.
-          git fetch origin dev
-
-          # Check if the PR source commit is included in dev.
-          if git merge-base --is-ancestor "$(System.PullRequest.SourceCommitId)" "origin/dev"; then
-            echo "The PR source commit is included in dev."
-          else
-            echo "The PR source commit is not included in dev. Merge the feature branch into dev before merging into main."
-            exit 1
-          fi
-        displayName: Check if merged into dev 🔍

@@ -1,0 +1,30 @@
+name: Desync check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run_diff_check:
+    name: Desync check 🔍
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout assemblyline-mcp
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if merged into dev 🔍
+        run: |
+          # Fetch the dev branch to check if the PR source commit is included in dev.
+          git fetch origin dev
+
+          # Check if the PR source commit is included in dev.
+          if git merge-base --is-ancestor "${{ github.event.pull_request.head.sha }}" "origin/dev"; then
+            echo "The PR source commit is included in dev."
+          else
+            echo "The PR source commit is not included in dev. Merge the feature branch into dev before merging into main."
+            exit 1
+          fi
