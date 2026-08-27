@@ -76,21 +76,17 @@ jobs:
 
   - job: run_diff_check
     displayName: Desync check 🔍
-    timeoutInMinutes: 15
+    condition: and(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['System.PullRequest.TargetBranch'], 'main'))
+    timeoutInMinutes: 5
     steps:
       - checkout: self
         displayName: Checkout assemblyline-mcp
         fetchDepth: 0
       - script: |
-          # If this is a PR to main, then we need to check if changes from the feature branch have been merged into dev.
-          echo "$(System.PullRequest.TargetBranch)"
-          if [[ "$(System.PullRequest.TargetBranch)" != "main" ]]; then
-            echo "This is not a pull request to main; skipping the dev merge check."
-            exit 0
-          fi
-
+          # Fetch the dev branch to check if the PR source commit is included in dev.
           git fetch origin dev
 
+          # Check if the PR source commit is included in dev.
           if git merge-base --is-ancestor "$(System.PullRequest.SourceCommitId)" "origin/dev"; then
             echo "The PR source commit is included in dev."
           else
