@@ -83,7 +83,8 @@ jobs:
         fetchDepth: 0
       - script: |
           # If this is a PR to main, then we need to check if changes from the feature branch have been merged into dev.
-          if [[ "$(System.PullRequest.TargetBranch)" != "refs/heads/main" ]]; then
+          echo "$(System.PullRequest.TargetBranch)"
+          if [[ "$(System.PullRequest.TargetBranch)" != "main" ]]; then
             echo "This is not a pull request to main; skipping the dev merge check."
             exit 0
           fi
