@@ -7,7 +7,7 @@ authors = [
     { name = "CCCS Assemblyline development team", email = "assemblyline@cyber.gc.ca" },
 ]
 dynamic = ["version", "readme"]
-license = { file = "LICENCE.md" }
+license-files = ["LICENCE.md"]
 keywords = [
     "assemblyline",
     "malware analysis",
@@ -26,7 +26,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.14",
 ]
 
