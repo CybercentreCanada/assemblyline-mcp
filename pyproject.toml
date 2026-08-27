@@ -51,7 +51,7 @@ ssdeep = ["pkg_resources"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py311"
+target-version = "py314"
 
 [tool.ruff.format]
 docstring-code-format = true
