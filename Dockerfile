@@ -9,4 +9,4 @@ RUN uv sync --locked
 
 EXPOSE 8000
 
-CMD ["uv", "run", "--no-project", "mcp_server/app.py"]
+CMD ["uv", "run", "mcp_server/app.py"]
