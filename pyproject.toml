@@ -78,7 +78,3 @@ preview = true
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
-[build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
-build-backend = "setuptools.build_meta"
