@@ -36,14 +36,18 @@ jobs:
         inputs:
           versionSpec: "3.14"
       - checkout: self
+        fetchDepth: 1
         displayName: Checkout assemblyline-mcp
       # API Dependencies
       - checkout: assemblyline-base
         displayName: Checkout assemblyline-base
+        fetchDepth: 0
       - checkout: assemblyline-core
         displayName: Checkout assemblyline-core
+        fetchDepth: 0
       - checkout: assemblyline-ui
         displayName: Checkout assemblyline-ui
+        fetchDepth: 0
       - script: |
           git checkout -b $BRANCH_NAME -t origin/$BRANCH_NAME || true
           git status
