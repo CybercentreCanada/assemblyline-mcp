@@ -70,7 +70,7 @@ jobs:
         displayName: Setup environment 🏗️
 
       - script: |
-          docker compose run --build pytest bash -c "uv pip install .[test] && uv run pytest --durations=10 -rsx -vv --color=yes --junitxml=/opt/alv4/assemblyline-ui/test/test-results.xml"
+          docker compose run --build pytest bash -c "uv pip install --system .[test] && uv run pytest --durations=10 -rsx -vv --color=yes --junitxml=/opt/alv4/assemblyline-ui/test/test-results.xml"
         workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp/test
         displayName: Run tests 🧪
 
