@@ -121,5 +121,4 @@ services:
     depends_on:
       al_mcp:
         condition: service_healthy
-    extra_hosts:
-      - "localhost:host-gateway"
+    network_mode: "host"
