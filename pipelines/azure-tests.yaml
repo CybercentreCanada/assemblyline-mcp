@@ -49,21 +49,25 @@ jobs:
           git checkout -b $BRANCH_NAME -t origin/$BRANCH_NAME || true
           for d in ./*/; do (cd "$d" && git checkout $BRANCH_NAME || git checkout main); done
 
-          # Start up dependencies and wait until all services are healthy
-          echo "Starting docker compose services..."
-          sudo docker compose --progress=quiet -f assemblyline-mcp/test/docker-compose.yml up -d --wait
-          echo "Services started and healthy."
+          # Start all services except pytest
+          docker compose up -d --wait $(docker compose config --services | grep -v pytest)
 
-          # Setup python environment
-          sudo env "PATH=$PATH" "PIP_USE_PEP517=true" python -m pip install --no-cache-dir -e ./assemblyline-mcp[test]
-
-        workingDirectory: $(Pipeline.Workspace)/s
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp/test
         displayName: Setup environment 🏗️
 
       - script: |
-          pytest -rsx -vv
-        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
+          docker compose run --build pytest bash -c "uv pip install .[test] && uv run pytest --durations=10 -rsx -vv --color=yes --junitxml=/opt/alv4/assemblyline-ui/test/test-results.xml"
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp/test
         displayName: Run tests 🧪
+
+      - task: PublishTestResults@2
+        condition: always()
+        displayName: Publish test results
+        inputs:
+          testResultsFiles: "assemblyline-mcp/test/test-results.xml"
+          searchFolder: $(System.DefaultWorkingDirectory)
+          testRunTitle: "python3.14"
+
 
       - script: |
           ruff check

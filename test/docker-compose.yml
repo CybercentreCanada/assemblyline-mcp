@@ -1,7 +1,11 @@
 
 services:
   al_ui:
-    image: cccs/assemblyline_dev:4.7.1
+    build:
+      context: ../..
+      dockerfile: assemblyline-ui/test/Dockerfile
+      args:
+        - PYTHON_VERSION=${PYTHON_VERSION:-3.14}
     environment:
       - AL_UNSECURED_UI=true
     ports:
@@ -34,6 +38,11 @@ services:
     depends_on:
       al_ui:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "uv run python -c 'import requests; requests.head(\"http://localhost:8000/health\", timeout=2).raise_for_status()' || exit 1"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
     extra_hosts:
       - "localhost:host-gateway"
 
@@ -73,12 +82,9 @@ services:
     ports:
       - "443:443"
       - "80:80"
-    depends_on:
-      al_ui:
-        condition: service_started
 
   minio:
-    image: minio/minio
+    image: cgr.dev/chainguard/minio
     environment:
       MINIO_ROOT_USER: al_storage_key
       MINIO_ROOT_PASSWORD: Ch@ngeTh!sPa33w0rd
@@ -102,3 +108,18 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  pytest:
+    image: astral/uv:python3.14-trixie
+    environment:
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ${PATH_REWRITE:-.}/config/:/etc/assemblyline/
+      - ${PATH_REWRITE:-..}:/app
+    working_dir: /app
+    command: bash -c "uv pip install .[test] && uv run pytest -vv --full-trace"
+    depends_on:
+      al_mcp:
+        condition: service_healthy
+    extra_hosts:
+      - "localhost:host-gateway"
