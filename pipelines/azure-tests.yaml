@@ -74,6 +74,16 @@ jobs:
         workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp/test
         displayName: Run tests 🧪
 
+      - script: docker compose logs al_ui
+        condition: always()
+        displayName: UI Logs
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp/test
+
+      - script: docker compose logs al_mcp
+        condition: always()
+        displayName: MCP Logs
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp/test
+
       - task: PublishTestResults@2
         condition: always()
         displayName: Publish test results
