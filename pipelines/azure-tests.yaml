@@ -45,13 +45,23 @@ jobs:
       - checkout: assemblyline-ui
         displayName: Checkout assemblyline-ui
       - script: |
-          # Checkout the matching branch for all repositories, if the command fails, don't care.
           git checkout -b $BRANCH_NAME -t origin/$BRANCH_NAME || true
-          for d in ./*/; do (cd "$d" && git checkout $BRANCH_NAME || git checkout main); done
-
+          git status
+        displayName: Install assemblyline
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-base
+      - script: |
+          git checkout -b $BRANCH_NAME -t origin/$BRANCH_NAME || true
+          git status
+        displayName: Install assemblyline-core
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-core
+      - script: |
+          git checkout -b $BRANCH_NAME -t origin/$BRANCH_NAME || true
+          git status
+        displayName: Install assemblyline-ui
+        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-ui
+      - script: |
           # Start all services except pytest
           docker compose up -d --wait $(docker compose config --services | grep -v pytest)
-
         workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp/test
         displayName: Setup environment 🏗️
 
