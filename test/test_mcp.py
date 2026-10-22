@@ -45,6 +45,7 @@ def oauth_client():
             "client_id": "assemblyline",
             "scope": "openid email profile",
         },
+        timeout=10,
     ).json()["access_token"]
     return Client(MCP_SERVER_URL, auth=oauth_token, verify=False)
 
