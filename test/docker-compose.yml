@@ -117,7 +117,7 @@ services:
       - ${PATH_REWRITE:-.}/config/:/etc/assemblyline/
       - ${PATH_REWRITE:-..}:/app
     working_dir: /app
-    command: bash -c "uv pip install .[test] && uv run pytest -vv --full-trace"
+    command: bash -c "uv pip install --system .[test] && uv run pytest -vv --full-trace"
     depends_on:
       al_mcp:
         condition: service_healthy
