@@ -7,6 +7,8 @@ from assemblyline_client import get_client
 from fastmcp import FastMCP
 from fastmcp.exceptions import AuthorizationError
 from fastmcp.server.dependencies import get_http_request
+from mcp.types import ToolAnnotations
+from pydantic import Field
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
@@ -220,6 +222,41 @@ def initialize_server() -> FastMCP:
         """Retrieve submission details by ID."""
         with get_assemblyline_client() as client:
             return client.submission(submission_id)
+
+    @server.tool(
+        name="submit_by_hash",
+        description=(
+            "Submit a file for analysis using its SHA-256 hash without uploading file contents. "
+            "The file must be available to Assemblyline or retrievable through its configured external sources. "
+            "Creates a new submission and returns its details, including the sid for use with get_submission."
+        ),
+        tags={"file", "submission", "analysis"},
+        annotations=ToolAnnotations(
+            readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=True
+        ),
+    )
+    def submit_by_hash(
+        file_hash: Annotated[
+            str,
+            Field(min_length=64, max_length=64, pattern=r"^[0-9a-fA-F]+$"),
+            "The SHA-256 hash of the file to submit (64 hexadecimal characters).",
+        ],
+        fname: Annotated[str | None, "Optional filename for the submission; defaults to the hash."] = None,
+        params: Annotated[
+            dict | None, "Submission parameters overriding the user's defaults, such as services or ignore_cache."
+        ] = None,
+        metadata: Annotated[dict | None, "Metadata to include with the submission."] = None,
+        submission_profile: Annotated[str | None, "Optional Assemblyline submission profile name."] = None,
+    ) -> dict:
+        """Submit a file by SHA-256 using the current user's authentication."""
+        with get_assemblyline_client() as client:
+            return client.submit(
+                sha256=file_hash.lower(),
+                fname=fname,
+                params=params,
+                metadata=metadata,
+                submission_profile=submission_profile,
+            )
 
     @server.tool(
         name="file_info",

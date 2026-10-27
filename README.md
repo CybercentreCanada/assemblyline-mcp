@@ -9,6 +9,36 @@
 
 This repository provides the Model Context Protocol (MCP) server for Assemblyline.
 
+## Submit a file by hash
+
+The `submit_by_hash` tool creates a submission using a SHA-256 hash without uploading
+file contents. The file must be available to Assemblyline or retrievable through
+its configured external sources. MD5 and SHA-1 hashes are not accepted.
+
+| Argument | Description |
+| --- | --- |
+| `file_hash` | Required 64-character hexadecimal SHA-256 hash (case-insensitive). |
+| `fname` | Optional filename; defaults to the hash. |
+| `params` | Optional submission parameters, such as `services` or `ignore_cache`. |
+| `metadata` | Optional submission metadata. |
+| `submission_profile` | Optional Assemblyline submission profile name. |
+
+Example tool arguments:
+
+```json
+{
+  "file_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "fname": "sample.bin",
+  "metadata": {"source": "mcp"}
+}
+```
+
+The tool uses the current request's API key or OAuth token and respects Assemblyline's
+submission permissions, defaults, and quotas. API errors are returned as tool errors.
+The response contains the submission details, including `sid`, which can be passed
+to `get_submission` to retrieve its status. Repeated calls create new submissions;
+existing analysis results may be reused unless submission parameters specify otherwise.
+
 ## Image variants and tags
 
 | **Tag Type** | **Description**                                                                                  |      **Example Tag**       |
@@ -26,6 +56,28 @@ For more information about service development for Assemblyline, follow this [gu
 # Assemblyline 4 - MCP
 
 Ce référentiel fournit les fonctionnalités de base des services Assemblyline 4.
+
+## Soumettre un fichier par hachage
+
+L'outil `submit_by_hash` crée une soumission à partir d'un hachage SHA-256, sans
+téléverser le contenu du fichier. Le fichier doit être disponible dans Assemblyline
+ou récupérable à partir de ses sources externes configurées. Les hachages MD5 et
+SHA-1 ne sont pas acceptés.
+
+| Argument | Description |
+| --- | --- |
+| `file_hash` | Hachage SHA-256 obligatoire de 64 caractères hexadécimaux, sans distinction de casse. |
+| `fname` | Nom de fichier facultatif; le hachage est utilisé par défaut. |
+| `params` | Paramètres de soumission facultatifs, tels que `services` ou `ignore_cache`. |
+| `metadata` | Métadonnées de soumission facultatives. |
+| `submission_profile` | Nom facultatif d'un profil de soumission Assemblyline. |
+
+L'outil utilise la clé API ou le jeton OAuth de la requête et respecte les
+autorisations, les paramètres par défaut et les quotas d'Assemblyline. Les erreurs
+de l'API sont renvoyées comme erreurs d'outil. La réponse contient les détails de
+la soumission, dont `sid`, utilisable avec `get_submission` pour consulter son état.
+Chaque appel crée une nouvelle soumission; les résultats d'analyse existants peuvent
+être réutilisés, sauf indication contraire dans les paramètres de soumission.
 
 ## Variantes et étiquettes d'image
 
