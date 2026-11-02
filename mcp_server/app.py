@@ -234,7 +234,7 @@ def initialize_server() -> FastMCP:
     ) -> dict:
         """Retrieve file information by its hash."""
         with get_assemblyline_client() as client:
-            return client.file(file_hash)
+            return client.file.info(file_hash)
 
     @server.tool(
         name="file_strings",
