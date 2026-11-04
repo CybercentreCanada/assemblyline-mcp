@@ -48,7 +48,7 @@ core:
     apm_server:
       server_url: http://apm_server:8200/
     elasticsearch:
-      hosts: [http://elastic:devpass@elasticsearch:9200]
+      hosts: [http://elastic:devpass@localhost:9200]
     redis:
       host: redis
   redis:
@@ -59,22 +59,22 @@ core:
       port: 6379
 
 datastore:
-  hosts: [http://elastic:devpass@elasticsearch:9200]
+  hosts: [http://elastic:devpass@localhost:9200]
   archive:
     enabled: true
 
 filestore:
   cache:
     [
-      "s3://al_storage_key:Ch@ngeTh!sPa33w0rd@minio:9000?s3_bucket=al-cache&use_ssl=False",
+      "s3://al_storage_key:Ch@ngeTh!sPa33w0rd@localhost:9000?s3_bucket=al-cache&use_ssl=False",
     ]
   storage:
     [
-      "s3://al_storage_key:Ch@ngeTh!sPa33w0rd@minio:9000?s3_bucket=al-storage&use_ssl=False",
+      "s3://al_storage_key:Ch@ngeTh!sPa33w0rd@localhost:9000?s3_bucket=al-storage&use_ssl=False",
     ]
   archive:
     [
-      "s3://al_storage_key:Ch@ngeTh!sPa33w0rd@minio:9000?s3_bucket=al-archive&use_ssl=False",
+      "s3://al_storage_key:Ch@ngeTh!sPa33w0rd@localhost:9000?s3_bucket=al-archive&use_ssl=False",
     ]
 
 logging:
