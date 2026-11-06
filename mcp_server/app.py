@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from contextlib import contextmanager
 from typing import Annotated, Literal
 
@@ -7,6 +8,8 @@ from assemblyline_client import get_client
 from fastmcp import FastMCP
 from fastmcp.exceptions import AuthorizationError
 from fastmcp.server.dependencies import get_http_request
+from mcp.types import ToolAnnotations
+from pydantic import Field
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
@@ -220,6 +223,66 @@ def initialize_server() -> FastMCP:
         """Retrieve submission details by ID."""
         with get_assemblyline_client() as client:
             return client.submission(submission_id)
+
+    @server.tool(
+        name="submit_by_hash",
+        description=(
+            "Submit a file for analysis using a hash or configured file-source identifier without uploading file contents. "
+            "Use system_configuration's submission.file_sources to discover input types, validation patterns, "
+            "and available source names. The file must be available to Assemblyline or retrievable through selected "
+            "external sources. Set params.default_external_sources to select sources by name, or omit it to use "
+            "the user's defaults. Assemblyline evaluates configured sources in order until one succeeds. "
+            "Creates a new submission and returns its details, including the sid for use with get_submission."
+        ),
+        tags={"file", "submission", "analysis"},
+        annotations=ToolAnnotations(
+            readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=True
+        ),
+    )
+    def submit_by_hash(
+        file_hash: Annotated[
+            str,
+            Field(min_length=1),
+            "The hash or file-source identifier, matching the selected hash_type's configured validation pattern.",
+        ],
+        fname: Annotated[str | None, "Optional filename for the submission; defaults to the hash."] = None,
+        params: Annotated[
+            dict | None,
+            "Submission parameters overriding the user's defaults, such as services or ignore_cache. "
+            "Use default_external_sources (a list of source names) to select external file sources.",
+        ] = None,
+        metadata: Annotated[dict | None, "Metadata to include with the submission."] = None,
+        submission_profile: Annotated[str | None, "Optional Assemblyline submission profile name."] = None,
+        hash_type: Annotated[
+            str,
+            Field(min_length=1),
+            "Input type: sha256 (default), sha1, md5, tlsh, ssdeep, or a custom type listed in "
+            "system_configuration's submission.file_sources. Specify this explicitly for non-SHA-256 inputs.",
+        ] = "sha256",
+    ) -> dict:
+        """Submit a file using an input type advertised by Assemblyline.
+
+        Raises:
+            ValueError: If the input type is unsupported or the value does not match its configured pattern.
+        """
+        with get_assemblyline_client() as client:
+            file_sources = client.user.whoami()["configuration"]["submission"]["file_sources"]
+            if hash_type not in file_sources:
+                raise ValueError(
+                    f"Unsupported hash_type {hash_type!r}. Consult system_configuration's submission.file_sources."
+                )
+            if hash_type in {"md5", "sha1", "sha256"}:
+                file_hash = file_hash.lower()
+            if re.fullmatch(file_sources[hash_type]["pattern"], file_hash) is None:
+                raise ValueError(f"file_hash does not match the configured pattern for {hash_type!r}.")
+
+            return client.submit(
+                fetch_input=(hash_type, file_hash),
+                fname=fname,
+                params=params,
+                metadata=metadata,
+                submission_profile=submission_profile,
+            )
 
     @server.tool(
         name="file_info",
