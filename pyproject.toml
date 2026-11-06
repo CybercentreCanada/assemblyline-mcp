@@ -2,7 +2,7 @@
 name = "assemblyline-mcp"
 description = "FastMCP server for Assemblyline"
 requires-python = ">=3.14"
-dependencies = ["fastmcp==3.4.7", "assemblyline_client>=4.10.1"]
+dependencies = ["fastmcp==3.4.10", "assemblyline_client>=4.10.1"]
 authors = [
     { name = "CCCS Assemblyline development team", email = "assemblyline@cyber.gc.ca" },
 ]
