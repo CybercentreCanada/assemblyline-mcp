@@ -9,7 +9,6 @@
 
 This repository provides the Model Context Protocol (MCP) server for Assemblyline.
 
-
 ## Image variants and tags
 
 | **Tag Type** | **Description**                                                                                  |      **Example Tag**       |
