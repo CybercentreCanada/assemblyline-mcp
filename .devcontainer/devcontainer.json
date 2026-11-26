@@ -1,13 +1,24 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
+// README at: https://github.com/devcontainers/templates/tree/main/src/rust
 {
-	"name": "Existing Dockerfile",
-	"image": "mcr.microsoft.com/devcontainers/python:3.14",
-	"postCreateCommand": "pip install uv && uv pip install -e .[dev]",
-	"runArgs": [
-		"--network=host",
-		"--add-host=localhost:host-gateway"
+	"name": "Python",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	// Path to the docker-compose file relative to this json file
+	"dockerComposeFile": "../test/docker-compose.yml",
+	"overrideCommand": true,
+	"postStartCommand": "uv pip install --system .[test]",
+	// The primary service you want to develop inside
+	"service": "pytest",
+	// The path inside the container to open when connecting
+	"workspaceFolder": "/app",
+	"mounts": [
+		"source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly"
 	],
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -17,13 +28,7 @@
 				"ms-python.isort"
 			]
 		}
-	}
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-	// Configure tool-specific properties.
-	// "customizations": {},
+	},
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "devcontainer"
+	"remoteUser": "root"
 }
