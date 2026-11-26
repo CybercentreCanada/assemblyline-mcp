@@ -24,6 +24,12 @@ resources:
       type: github
       endpoint: github-repo-sa
       name: CybercentreCanada/assemblyline-ui
+    - repository: PipelineTemplates
+      type: github
+      name: CybercentreCanada/assemblyline
+      ref: refs/heads/master
+      endpoint: github-repo-sa
+      trigger: none
 
 jobs:
   # Main job that tests MCP functionality and covers linting and formatting checks.
@@ -35,6 +41,7 @@ jobs:
         displayName: Set python version
         inputs:
           versionSpec: "3.14"
+      - template: pipelines/templates/steps/init-agent.yaml@PipelineTemplates
       - checkout: self
         fetchDepth: 1
         displayName: Checkout assemblyline-mcp
