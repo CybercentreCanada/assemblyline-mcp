@@ -24,6 +24,12 @@ resources:
       type: github
       endpoint: github-repo-sa
       name: CybercentreCanada/assemblyline-ui
+    - repository: PipelineTemplates
+      type: github
+      name: CybercentreCanada/assemblyline
+      ref: refs/heads/master
+      endpoint: github-repo-sa
+      trigger: none
 
 jobs:
   # Main job that tests MCP functionality and covers linting and formatting checks.
@@ -31,10 +37,7 @@ jobs:
     displayName: Run tests 🧪
     timeoutInMinutes: 15
     steps:
-      - task: UsePythonVersion@0
-        displayName: Set python version
-        inputs:
-          versionSpec: "3.14"
+      - template: pipelines/templates/steps/init-agent.yaml@PipelineTemplates
       - checkout: self
         fetchDepth: 1
         displayName: Checkout assemblyline-mcp
@@ -70,7 +73,7 @@ jobs:
         displayName: Setup environment 🏗️
 
       - script: |
-          docker compose run --build pytest bash -c "uv pip install --system .[test] && uv run pytest --durations=10 -rsx -vv --color=yes --junitxml=/opt/alv4/assemblyline-ui/test/test-results.xml"
+          docker compose run pytest bash -c "uv pip install --system .[test] && uv run pytest --durations=10 -rsx -vv --color=yes --junitxml=/opt/alv4/assemblyline-mcp/test/test-results.xml"
         workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp/test
         displayName: Run tests 🧪
 
