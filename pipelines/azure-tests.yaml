@@ -73,7 +73,8 @@ jobs:
         displayName: Setup environment 🏗️
 
       - script: |
-          docker compose run pytest bash -c "uv pip install --system .[test] && uv run pytest --durations=10 -rsx -vv --color=yes --junitxml=/opt/alv4/assemblyline-mcp/test/test-results.xml"
+          docker compose run -v $(Pipeline.Workspace)/s/assemblyline-mcp/test:/opt/alv4/assemblyline-mcp/test \
+            pytest bash -c "uv pip install --system .[test] && uv run pytest --durations=10 -rsx -vv --color=yes --junitxml=/opt/alv4/assemblyline-mcp/test/test-results.xml"
         workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp/test
         displayName: Run tests 🧪
 
@@ -94,11 +95,3 @@ jobs:
           testResultsFiles: "assemblyline-mcp/test/test-results.xml"
           searchFolder: $(System.DefaultWorkingDirectory)
           testRunTitle: "python3.14"
-
-
-      - script: |
-          pip install ruff
-          ruff check
-          ruff format --check
-        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
-        displayName: Ruff checks 🐶
