@@ -95,11 +95,3 @@ jobs:
           testResultsFiles: "assemblyline-mcp/test/test-results.xml"
           searchFolder: $(System.DefaultWorkingDirectory)
           testRunTitle: "python3.14"
-
-
-      - script: |
-          pip install ruff
-          ruff check
-          ruff format --check
-        workingDirectory: $(Pipeline.Workspace)/s/assemblyline-mcp
-        displayName: Ruff checks 🐶
