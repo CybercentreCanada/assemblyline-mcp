@@ -225,9 +225,9 @@ def initialize_server() -> FastMCP:
             return client.submission(submission_id)
 
     @server.tool(
-        name="submit_by_hash",
+        name="submit",
         description=(
-            "Submit a file for analysis using a hash or configured file-source identifier without uploading file contents. "
+            "Submit a file for analysis. This is limited to using a hash or configured file-source identifier without uploading file contents. "
             "Use system_configuration's submission.file_sources to discover input types, validation patterns, "
             "and available source names. The file must be available to Assemblyline or retrievable through selected "
             "external sources. Set params.default_external_sources to select sources by name, or omit it to use "
@@ -239,7 +239,7 @@ def initialize_server() -> FastMCP:
             readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=True
         ),
     )
-    def submit_by_hash(
+    def submit(
         file_hash: Annotated[
             str,
             Field(min_length=1),

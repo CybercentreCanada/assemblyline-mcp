@@ -18,7 +18,7 @@ async def test_submit_by_hash_rejects_invalid_input(apikey_client, file_hash, ha
 
 
 @pytest.mark.parametrize("hash_type", HASH_PATTERN_MAP)
-async def test_submit(apikey_client, hash_type):
+async def test_submit_by_hash(apikey_client, hash_type):
     # Create a file to submit by hash
     ds = forge.get_datastore()
     fs = forge.get_filestore()
